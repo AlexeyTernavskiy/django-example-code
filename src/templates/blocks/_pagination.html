@@ -3,7 +3,7 @@
 
         {% if page_obj.has_previous %}
             <li class="page-item">
-                <a href="?{{ page_obj.previous_page_number }}"
+                <a href="?{{ page_obj.previous_page_number.querystring }}"
                    class="page-link" aria-label="Previous">
                     <span>&lsaquo;&lsaquo;</span>
                 </a>
@@ -22,7 +22,7 @@
                     </li>
                 {% else %}
                     <li class="page-item">
-                        <a href="?{{ page }}" class="page-link"
+                        <a href="?{{ page.querystring }}" class="page-link"
                            aria-label="Previous">
                             <span aria-hidden="true">{{ page }}</span>
                         </a>
@@ -37,7 +37,7 @@
 
         {% if page_obj.has_next %}
             <li class="page-item">
-                <a href="?{{ page_obj.next_page_number }}"
+                <a href="?{{ page_obj.next_page_number.querystring }}"
                    class="page-link" aria-label="Next">
                     <span>&rsaquo;&rsaquo;</span>
                 </a>
