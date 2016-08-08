@@ -57,11 +57,36 @@ DJANGO_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+
     'src.apps.product',
 ]
 
 INSTALLED_APPS = DJANGO_APPS
 # END APP CONFIGURATION
+
+
+# ALLAUTH CONFIGURATION
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+ACCOUNT_FORMS = {
+    'login': 'src.core.forms.CustomLoginForm',
+    'signup': 'src.core.forms.CustomSignupForm',
+}
+
+# LOGIN URL
+LOGIN_URL = 'account_login'
+# END LOGIN URL
+
+# LOGIN REDIRECT URL
+LOGIN_REDIRECT_URL = '/'
+# END LOGIN REDIRECT URL
+
+# END ALLAUTH CONFIGURATION
 
 
 # MIDDLEWARE CONFIGURATION
