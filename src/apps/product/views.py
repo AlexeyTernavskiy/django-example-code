@@ -8,12 +8,12 @@ from src.apps.product.models import ProductModel
 
 class ProductsListView(ListView):
     model = ProductModel
-    template_name = 'pages/products.html'
+    template_name = 'product/products.html'
     context_object_name = 'products'
     paginate_by = 5
 
 
 class ProductDetailView(DetailView):
     model = ProductModel
-    template_name = 'pages/product.html'
+    template_name = 'product/product.html'
     context_object_name = 'product'
