@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+    <article class="container p-a-1">
+        <header>
+            <h1>{% trans "Sign Up" %}</h1>
+        </header>
+        <p>
+            {% blocktrans %}
+                Already have an account? Then please <a href="{{ login_url }}"><strong>sign in</strong></a>.
+            {% endblocktrans %}
+        </p>
+        {% if form.errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-warning" role="alert">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <form class="col-xs-4" id="signup_form" method="post" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+            {% for field in form %}
+                {% if field.name != 'email' %}
+                    <fieldset class="form-group {% if field.errors %}has-danger{% endif %}">
+                        {% if field.name != 'confirmation_key' %}
+                            <label class="control-label" for="{{ field.name }}">{{ field.label }}</label>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <strong>{{ error|escape }}</strong>
+                            </div>
+                        {% endfor %}
+                        {{ field }}
+                    </fieldset>
+                {% endif %}
+            {% endfor %}
+            <button id="signUp" class="btn btn-primary" type="submit">{% trans "Sign Up" %} &raquo;</button>
+        </form>
+        <div class="clearfix"></div>
+    </article>
+{% endblock %}

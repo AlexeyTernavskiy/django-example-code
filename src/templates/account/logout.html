@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block title %}{% trans "Sign Out" %}{% endblock %}
+
+{% block content %}
+    <article class="container p-a-1 text-md-center">
+        <header>
+            <h1>{% trans "Sign Out" %}</h1>
+        </header>
+
+        <p class="lead">{% trans 'Are you sure you want to sign out?' %}</p>
+        <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            <button class="btn btn-danger-outline" type="submit">{% trans 'Yes' %}</button>
+            <button class="btn btn-secondary" onclick="window.history.back()">{% trans 'Return on previous page' %}</button>
+        </form>
+    </article>
+{% endblock %}
