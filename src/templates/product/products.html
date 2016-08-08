@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}
+    {% trans 'List of Products' %}
+{% endblock %}
+{% block content %}
+    <article class="m-t-1">
+        <header class="text-md-center">
+            <h2 class="text-primary">{% trans 'List of products:' %}</h2>
+        </header>
+        <aside class="p-a-1">
+            <div class="pull-right">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'products:add' %}" class="btn btn-primary">{% trans 'Add product' %}</a>
+                {% else %}
+                    <p class="card-text text-md-center">Y{% trans 'ou need to be logged in, to add the product.' %}</p>
+                {% endif %}
+            </div>
+            <div class="clearfix"></div>
+        </aside>
+        {% for product in products %}
+            <div class="list-group">
+                <a href="{{ product.get_absolute_url }}" class="list-group-item list-group-item-info">
+                    <h4 class="list-group-item-heading">{{ product.name }}</h4>
+                    <p class="list-group-item-text">{{ product.description|truncatewords:50 }}</p>
+                    <div class="pull-left">
+                    <span class="label label-info">
+                        Price: {{ product.price }}
+                        <i class="fa fa-usd" aria-hidden="true"></i>
+                    </span>
+                        <br>
+                        <span class="label label-success">
+                        Like <i class="fa fa-heart" aria-hidden="true"></i> {{ product.like.count|default_if_none:0 }}
+                    </span>
+                    </div>
+                    <div class="pull-right">
+                        <span class="label label-pill label-default">{% trans 'Author:' %} {{ product.user }}</span>
+                        <br>
+                        <span class="label label-pill label-default">{% trans 'Create:' %} {{ product.created|date }}</span>
+                    </div>
+                    <div class="clearfix"></div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="card card-block text-md-center">
+                <h4 class="card-title">{% trans 'No have any products.' %}</h4>
+            </div>
+        {% endfor %}
+        {% if is_paginated %}
+            {% include 'blocks/_pagination.html' %}
+        {% endif %}
+    </article>
+{% endblock %}
