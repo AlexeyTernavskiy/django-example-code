@@ -1,0 +1,21 @@
+{
+  "name": "test_assignment",
+  "authors": [
+    "lambda <woop.woop.woop.wooop.woop.woop@gmail.com>"
+  ],
+  "description": "Example Django app",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "v4.0.0-alpha.3",
+    "components-font-awesome": "^4.6.3"
+  }
+}
