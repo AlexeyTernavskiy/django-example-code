@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}
+    {% trans 'Index page' %}
+{% endblock %}
+{% block content %}
+    <article class="jumbotron">
+        <header class="row text-md-center">
+            <h1 class="col-md-12">{% trans 'Example Test Assignment' %}</h1>
+        </header>
+        <section class="row p-a-2">
+            <p class="lead text-md-center col-md-12">{% trans 'Create django project in git repository' %}</p>
+            <ol class="text-md-left col-md-12">
+                <li>
+                    {% trans 'Model Product has the following fields:' %}
+                    <ul>
+                        <li>{% trans 'name' %}</li>
+                        <li>{% trans 'slug' %}</li>
+                        <li>{% trans 'description' %}</li>
+                        <li>{% trans 'price' %}</li>
+                        <li>{% trans 'created_at' %}</li>
+                        <li>{% trans 'modified_at' %}</li>
+                    </ul>
+                </li>
+                <li>{% trans 'Add all the models in the admin panel (all of the objects to be displayed on the field name, "view on site" button should work)' %}
+                </li>
+                <li>{% trans 'Create a page with a list of products, to withdraw the name, description and price of the products' %}
+                    (`/products/`)
+                </li>
+                <li>{% trans 'Create a product page display name, description, and price of the product' %} (`/products/<code><
+                    product_slug ></code>/`)
+                </li>
+                <li>{% trans 'Add comments on the product page (authorization is not required, the flat, i.e. not tree) page, to display the existing comments for the last 24 hours sorted by date of adding (the latest at first)' %}
+                </li>
+                <li>{% trans 'Also on the product page to add the ability to click the `like` product (only for logged users and no more than one time), to hold the likes in the database and display the number of likes for each product and add the ability to sort by likes at the pages with the list of products' %}
+                </li>
+                <li>{% trans 'To display error forms near the fields' %}</li>
+                <li>{% trans 'Use django.messages for comments and likes' %}</li>
+                <li>{% trans 'Use migrations' %}</li>
+                <li>{% trans 'Follow pep8' %}</li>
+                <li>{% trans 'Write unit tests for the product page with comments' %}</li>
+                <li>{% trans 'Use MySQL or PostgreSQL (at choice)' %}</li>
+                <li>{% trans 'Make two settings available: for development and for deploy' %}</li>
+                <li>{% trans 'All pages should be available on the links' %}</li>
+                <li>{% trans 'Create a generic template and extend from it all the other' %}</li>
+                <li>{% trans 'Add a file with dependencies' %}</li>
+                <li>{% trans 'Optimize the number of requests to database at the pages (cash can be used, but first to reduce the number of unnecessary requests)' %}</li>
+            </ol>
+        </section>
+    </article>
+{% endblock %}
