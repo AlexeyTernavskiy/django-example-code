@@ -1,0 +1,39 @@
+{% load i18n %}
+
+<nav class="navbar navbar-light">
+    <a href="{% url 'index' %}" class="pull-left m-r-1"><i class="fa fa-home fa-fw fa-2x" aria-hidden="true"></i></a>
+
+    <ul class="nav navbar-nav pull-left">
+        <li class="nav-item">
+            <a href="{% url 'products:list' %}" class="btn btn-primary">{% trans 'List of products' %}</a>
+        </li>
+        {% if user.is_authenticated %}
+            <li class="nav-item">
+                <span class="text-primary">{% trans 'Welcome, Dear' %} <strong>{{ user.username }}</strong></span>
+            </li>
+        {% endif %}
+    </ul>
+    <ul class="nav navbar-nav pull-right">
+        {% if user.is_authenticated %}
+            {% if user.is_superuser %}
+                <li class="nav-item">
+                    <a class="btn btn-success" target="_blank" href="{% url 'admin:index' %}">
+                        {% trans 'Admin Panel' %}
+                    </a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a href="{% url 'account_logout' %}" class="btn btn-danger">{
+
+                    }% trans 'Log Out' %}
+                </a>
+            </li>
+        {% else %}
+            <li class="nav-item">
+                <a href="{% url 'account_login' %}" class="btn btn-success">
+                    {% trans 'Sign In' %}
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
