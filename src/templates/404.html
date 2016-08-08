@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}
+    {% trans 'Oops. 404 - Page not found' %}
+{% endblock %}
+{% block content %}
+    <article class="text-md-center">
+        <header>
+            <h2>{% trans 'Oops. 404 - Page not found' %}</h2>
+        </header>
+        <br>
+        <button class="btn btn-secondary" onclick="window.history.back()">{% trans 'Return on previous page' %}</button>
+    </article>
+{% endblock %}

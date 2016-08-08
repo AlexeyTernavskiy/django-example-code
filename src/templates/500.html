@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}
+    {% trans 'Oops. 500 - Internal Server Error' %}
+{% endblock %}
+{% block content %}
+    <article class="text-md-center">
+        <header>
+            <h2>{% trans 'Oops. 500 - Internal Server Error' %}</h2>
+        </header>
+        <br>
+        <a class="btn btn-secondary" href="{% url 'index' %}">{% trans 'Return on Index page' %}</a>
+    </article>
+{% endblock %}

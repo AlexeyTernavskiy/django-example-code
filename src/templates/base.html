@@ -1,0 +1,46 @@
+{% load staticfiles %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block style %}
+        <link rel="stylesheet" href="{% static 'vendors/tether/dist/css/tether.min.css' %}">
+        <link rel="stylesheet" href="{% static 'vendors/bootstrap/dist/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'vendors/components-font-awesome/css/font-awesome.min.css' %}">
+        {% block extra_style %}{% endblock %}
+    {% endblock %}
+</head>
+<body class="container">
+
+<header class="main-header">
+</header>
+
+<main class="main-content">
+    {% block messages %}
+        {% if messages %}
+            {% for message in messages %}
+                <div id="alert" class="alert {{ alert_level }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endblock %}
+
+    {% block content %}
+
+    {% endblock %}
+</main>
+
+<footer class="main-footer text-md-center p-a-1">
+    <a href="mailto:woop.woop.woop.wooop.woop.woop.@gmail.com">woop.woop.woop.wooop.woop.woop.@gmail.com</a>
+</footer>
+
+{% block scripts %}
+    <script src="{% static 'vendors/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'vendors/tether/dist/js/tether.min.js' %}"></script>
+    <script src="{% static 'vendors/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+{% endblock %}
+</body>
+</html>
