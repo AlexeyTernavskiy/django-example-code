@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+    {{ product.name }}
+{% endblock %}
+{% block content %}
+    <article class="m-t-1">
+        <div class="card">
+            {% if product.user == request.user %}
+                <div class="card-header pull-right">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'products:edit' product.slug %}"
+                           class="btn btn-primary">{% trans 'Edit product' %}</a>
+                        <a href="{% url 'products:delete' product.slug %}"
+                           class="btn btn-danger">{% trans 'Delete product' %}</a>
+                    </div>
+                </div>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <div class="card-header pull-left">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'products:add' %}" class="btn btn-success">Add new product</a>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="clearfix"></div>
+            <div class="card-block">
+                <h2 class="card-title text-md-center">{{ product.name }}</h2>
+                <p class="card-text lead indent">{{ product.description }}</div>
+            <div class="card-footer">
+                <div class="pull-right">
+                    <div id="like">
+                        <span class="label label-success">
+                            Like <i class="fa fa-heart"
+                                    aria-hidden="true"></i> <samp>{{ product.like.count|default_if_none:0 }}</samp>
+                        </span>
+                    </div>
+                    <span class="label label-info">Price: {{ product.price }} <i class="fa fa-usd"
+                                                                                 aria-hidden="true"></i></span>
+                </div>
+                <div class="pull-left">
+                    <span class="label label-pill label-default">
+                        <i class="fa fa-user" aria-hidden="true"> Author: {{ product.user }}</i>
+                    </span>
+                    <br>
+                    <span class="label label-pill label-default">
+                        <i class="fa fa-calendar" aria-hidden="true"> Create: {{ product.created|date }}</i>
+                    </span>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </article>
+{% endblock %}
