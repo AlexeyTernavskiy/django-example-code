@@ -34,5 +34,6 @@ class ProductsListView(PaginationMixin, ListView):
 
 class ProductDetailView(DetailView):
     model = ProductModel
+    queryset = ProductModel.objects.select_related('user').annotate(like_total=Count('like'))
     template_name = 'product/product.html'
     context_object_name = 'product'
