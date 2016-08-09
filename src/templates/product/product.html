@@ -31,7 +31,7 @@
                 <p class="card-text lead indent">{{ product.description }}</div>
             <div class="card-footer">
                 <div class="pull-right">
-                    <div id="like">
+                    <div id="like" {% if user.is_authenticated %}class="pointer"{% endif %}>
                         <span class="label label-success">
                             Like <i class="fa fa-heart"
                                     aria-hidden="true"></i> <samp>{{ product.like_total }}</samp>
@@ -54,4 +54,9 @@
             </div>
         </div>
     </article>
+{% endblock %}
+{% block extra_scripts %}
+    {% if user.is_authenticated %}
+        <script src="{% static 'js/like.js' %}"></script>
+    {% endif %}
 {% endblock %}
