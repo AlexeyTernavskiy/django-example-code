@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^(?P<slug>[-\w]+)/$', views.ProductDetailView.as_view(), name='detail'),
     url(r'^(?P<slug>[-\w]+)/edit/$', views.ProductUpdateView.as_view(), name='edit'),
     url(r'^(?P<slug>[-\w]+)/delete/$', views.ProductDeleteView.as_view(), name='delete'),
+    url(r'^(?P<slug>[-\w]+)/like/$', views.LikeView.as_view(), name='like'),
 ]
