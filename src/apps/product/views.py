@@ -54,10 +54,15 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
             'slug': kwargs.get('slug')
         })
 
+    def post(self, request, *args, **kwargs):
+        request.POST = request.POST.copy()
+        request.POST['name'] = request.POST['name'].capitalize()
+        return super(ProductCreateView, self).post(request, *args, **kwargs)
+
     def form_valid(self, form):
         form = form.save(commit=False)
         form.user = self.request.user
-        form.name = form.name.capitalize()
+        form.name = form.name
         form.description = form.description.capitalize()
         form.slug = re.sub("^\s+|\n|\r|\s+$", '', form.name.lower()).replace(' ', '-')
         form.save()
