@@ -1,0 +1,36 @@
+{% load i18n %}
+<section class="p-a-1">
+    <h2 class="text-md-center">{% trans 'Comments' %}:</h2>
+    <form id="comment-form" class="row text-md-center">
+        {% csrf_token %}
+        {{ form }}
+        <div class="clearfix"></div>
+        <br>
+        <button id="comment-submit" class="btn btn-primary" disabled>{% trans 'Add comment' %}</button>
+    </form>
+    {% for comment in comments %}
+        <div class="media" data-id="{{ comment.id }}">
+            <a class="media-left" href="#">
+                <img class="media-object" src="http://placehold.it/50x50" alt="User Photo">
+            </a>
+            <div class="media-body">
+                <h4 class="media-heading">
+                    {% if comment.user.username %}
+                        {{ comment.user.username }}
+                    {% else %}
+                        Anonymous
+                    {% endif %}
+                </h4>
+                <p>{{ comment.comment }}</p>
+            </div>
+            <div class="media-footer">
+                <p>{{ comment.created|date:"F d, Y," }} {{ comment.created|time:"H:i A" }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <p id="no-comments">{% trans 'No comments' %}</p>
+    {% endfor %}
+    <div class="text-md-center">
+        <button class="btn btn-info" id="last-comments">Show last 5 comments</button>
+    </div>
+</section>
