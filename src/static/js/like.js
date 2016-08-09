@@ -28,6 +28,8 @@ $(document).ready(function () {
             (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') || !(/^(\/\/|http:|https:).*/.test(url));
     }
 
+    var csrftoken = getCookie('csrftoken');
+
     $.ajaxSetup({
         beforeSend: function (xhr, settings) {
             if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
@@ -36,13 +38,13 @@ $(document).ready(function () {
         }
     });
 
-    var csrftoken = getCookie('csrftoken');
+
     $('#like').on('click', function (event) {
         event.preventDefault();
         var likeMsg = $('.alert > span');
-        var likeMsgAlert = function (message) {
+        var likeMsgAlert = function (message, alertType) {
             return $('main > article').before('' +
-                '<div class="alert alert-danger alert-dismissible fade in" role="alert">' +
+                '<div class="alert alert-' + alertType + ' alert-dismissible fade in" role="alert">' +
                 '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
                 '<span aria-hidden="true">&times;</span>' +
                 '</button>' +
@@ -50,23 +52,23 @@ $(document).ready(function () {
                 '</div>' +
                 '');
         };
-        $.ajax({
+        return $.ajax({
             url: 'like/',
             type: 'POST',
             success: function (data) {
                 if (likeMsg.length > 0) {
                     likeMsg.text(data.message);
                 } else {
-                    likeMsgAlert(data.message)
+                    likeMsgAlert(data.message, 'info')
                 }
-                return $('#like').find('samp').html(data.like_count);
+                $('#like').find('samp').html(data.like_count);
             },
             error: function (data) {
                 var message = $.parseJSON(data.responseText).message;
                 if (likeMsg.length > 0) {
                     likeMsg.text(message);
                 } else {
-                    likeMsgAlert(message);
+                    likeMsgAlert(message, 'danger');
                 }
             },
         })
