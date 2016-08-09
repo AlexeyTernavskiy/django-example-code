@@ -23,9 +23,8 @@
                 </li>
             {% endif %}
             <li class="nav-item">
-                <a href="{% url 'account_logout' %}" class="btn btn-danger">{
-
-                    }% trans 'Log Out' %}
+                <a href="{% url 'account_logout' %}" class="btn btn-danger">
+                    {% trans 'Log Out' %}
                 </a>
             </li>
         {% else %}
