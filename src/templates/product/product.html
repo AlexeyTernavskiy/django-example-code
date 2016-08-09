@@ -53,10 +53,12 @@
                 <div class="clearfix"></div>
             </div>
         </div>
+        {% include 'product/comment.html' %}
     </article>
 {% endblock %}
 {% block extra_scripts %}
     {% if user.is_authenticated %}
         <script src="{% static 'js/like.js' %}"></script>
     {% endif %}
+    <script src="{% static 'js/comment.js' %}"></script>
 {% endblock %}
