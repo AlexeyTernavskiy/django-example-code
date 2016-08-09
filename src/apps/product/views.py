@@ -6,8 +6,10 @@ import re
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
-from django.shortcuts import redirect
+from django.http import JsonResponse
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
+from django.views import View
 from django.views.generic import CreateView
 from django.views.generic import DeleteView
 from django.views.generic import ListView, DetailView
@@ -15,7 +17,7 @@ from django.views.generic import UpdateView
 from pure_pagination import PaginationMixin
 
 from src.apps.product.forms import FilterForm, ProductForm
-from src.apps.product.models import ProductModel
+from src.apps.product.models import ProductModel, LikeModel
 
 
 class ProductsListView(PaginationMixin, ListView):
@@ -100,3 +102,27 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
         messages.add_message(self.request, messages.INFO,
                              'Product {} successfully deleted'.format(self.object.name))
         return super(ProductDeleteView, self).get_success_url()
+
+
+class LikeView(LoginRequiredMixin, View):
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            if request.is_ajax():
+                return JsonResponse({'message': 'To perform this action, you must be logged.'}, status=403)
+            else:
+                return self.get(request, *args, **kwargs)
+        return super(LikeView, self).dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return redirect(reverse('products:detail', kwargs={'slug': kwargs['slug']}))
+
+    def post(self, request, **kwargs):
+        if request.is_ajax():
+            product = get_object_or_404(ProductModel.objects, slug=kwargs.get('slug'))
+            try:
+                LikeModel.objects.get(user=request.user, product=product).delete()
+                msg = 'Like deleted'
+            except LikeModel.DoesNotExist:
+                LikeModel.objects.create(user=request.user, product=product)
+                msg = 'Like added'
+            return JsonResponse({'message': msg, 'like_count': product.like.count()}, status=200)
