@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}
+    {% trans 'Delete product' %} - {{ product.name }}
+{% endblock %}
+{% block content %}
+    <article class="p-a-1">
+        <header>
+            <h2 class="text-md-center">{% trans 'Delete product' %} {{ product.name }}</h2>
+        </header>
+        {% if form.errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-warning" role="alert">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <p class="text-danger text-md-center">
+            {% trans 'Are you sure you want to delete' %} <strong>{{ product.name }}</strong>
+        </p>
+        <form action="" method="post" class="text-md-center">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">{% trans 'Delete' %}</button>
+            <a href="{% url 'products:detail' product.slug %}"
+               class="btn btn-success">{% trans 'Cancel' %}</a>
+        </form>
+    </article>
+{% endblock %}

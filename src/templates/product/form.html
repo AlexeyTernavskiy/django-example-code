@@ -9,7 +9,7 @@
 {% endblock %}
 {% block content %}
     <article class="p-a-1">
-        <header>
+        <header class="m-b-3">
             <h2 class="text-md-center">
                 {% if not product %}
                     {% trans 'Add new Product' %}
@@ -25,7 +25,7 @@
                 </div>
             {% endfor %}
         {% endif %}
-        <form class="col-xs-4 m-b-1" action="" method="post">
+        <form class="col-md-4 col-md-offset-4 m-b-1" method="post">
             {% csrf_token %}
             {% for field in form %}
                 <fieldset class="form-group {% if field.errors %}has-danger{% endif %}">

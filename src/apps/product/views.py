@@ -3,12 +3,15 @@ from __future__ import unicode_literals
 
 import re
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import CreateView
+from django.views.generic import DeleteView
 from django.views.generic import ListView, DetailView
+from django.views.generic import UpdateView
 from pure_pagination import PaginationMixin
 
 from src.apps.product.forms import FilterForm, ProductForm
@@ -45,7 +48,7 @@ class ProductDetailView(DetailView):
     context_object_name = 'product'
 
 
-class ProductCreateView(LoginRequiredMixin, CreateView):
+class ProductCreateUpdateMixin(LoginRequiredMixin):
     form_class = ProductForm
     template_name = 'product/form.html'
 
@@ -57,7 +60,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     def post(self, request, *args, **kwargs):
         request.POST = request.POST.copy()
         request.POST['name'] = request.POST['name'].capitalize()
-        return super(ProductCreateView, self).post(request, *args, **kwargs)
+        return super(ProductCreateUpdateMixin, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):
         form = form.save(commit=False)
@@ -66,4 +69,34 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         form.description = form.description.capitalize()
         form.slug = re.sub("^\s+|\n|\r|\s+$", '', form.name.lower()).replace(' ', '-')
         form.save()
+
         return redirect(self.get_success_url(slug=form.slug))
+
+
+class ProductCreateView(ProductCreateUpdateMixin, CreateView):
+    def get_success_url(self, **kwargs):
+        messages.add_message(self.request, messages.INFO,
+                             'Product {} successfully added'.format(self.request.POST['name']))
+        return super(ProductCreateView, self).get_success_url(**kwargs)
+
+
+class ProductUpdateView(ProductCreateUpdateMixin, UpdateView):
+    model = ProductModel
+    context_object_name = 'product'
+
+    def get_success_url(self, **kwargs):
+        messages.add_message(self.request, messages.INFO,
+                             'Product {} successfully changed'.format(self.object.name))
+        return super(ProductUpdateView, self).get_success_url(**kwargs)
+
+
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
+    model = ProductModel
+    context_object_name = 'product'
+    template_name = 'product/delete.html'
+    success_url = '/products/'
+
+    def get_success_url(self, **kwargs):
+        messages.add_message(self.request, messages.INFO,
+                             'Product {} successfully deleted'.format(self.object.name))
+        return super(ProductDeleteView, self).get_success_url()
