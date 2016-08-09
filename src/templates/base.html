@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="{% static 'vendors/tether/dist/css/tether.min.css' %}">
         <link rel="stylesheet" href="{% static 'vendors/bootstrap/dist/css/bootstrap.min.css' %}">
         <link rel="stylesheet" href="{% static 'vendors/components-font-awesome/css/font-awesome.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
         {% block extra_style %}{% endblock %}
     {% endblock %}
 </head>
@@ -27,7 +28,7 @@
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    {{ message }}
+                    <span>{{ message }}</span>
                 </div>
             {% endfor %}
         {% endif %}
