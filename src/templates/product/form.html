@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}
+    {% if not product %}
+        {% trans 'Add new Product' %}
+    {% else %}
+        {% trans 'Edit' %} {{ product.name }}
+    {% endif %}
+{% endblock %}
+{% block content %}
+    <article class="p-a-1">
+        <header>
+            <h2 class="text-md-center">
+                {% if not product %}
+                    {% trans 'Add new Product' %}
+                {% else %}
+                    {% trans 'Edit' %} {{ product.name }}
+                {% endif %}
+            </h2>
+        </header>
+        {% if form.errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-warning" role="alert">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+            {% endfor %}
+        {% endif %}
+        <form class="col-xs-4 m-b-1" action="" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <fieldset class="form-group {% if field.errors %}has-danger{% endif %}">
+                    <label for="{{ field.name }}">{{ field.label }}:</label>
+                    {% for error in field.errors %}
+                        <div role="alert">
+                            <strong class="alert-danger m-l-1">{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                    <div class="clearfix"></div>
+                    {{ field }}
+                </fieldset>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">
+                {% if not product %}
+                    {% trans 'Add product' %} &raquo;
+                {% else %}
+                    {% trans 'Save' %} &raquo;
+                {% endif %}
+            </button>
+        </form>
+        <div class="clearfix"></div>
+    </article>
+{% endblock %}

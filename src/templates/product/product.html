@@ -21,7 +21,7 @@
             {% if user.is_authenticated %}
                 <div class="card-header pull-left">
                     <div class="btn-group" role="group">
-                        <a href="{% url 'products:add' %}" class="btn btn-success">Add new product</a>
+                        <a href="{% url 'products:add' %}" class="btn btn-success">{% trans 'Add new product' %}</a>
                     </div>
                 </div>
             {% endif %}
@@ -37,16 +37,17 @@
                                     aria-hidden="true"></i> <samp>{{ product.like_total }}</samp>
                         </span>
                     </div>
-                    <span class="label label-info">Price: {{ product.price }} <i class="fa fa-usd"
-                                                                                 aria-hidden="true"></i></span>
+                    <span class="label label-info">{% trans 'Price:' %} {{ product.price }} <i class="fa fa-usd"
+                                                                                               aria-hidden="true"></i></span>
                 </div>
                 <div class="pull-left">
                     <span class="label label-pill label-default">
-                        <i class="fa fa-user" aria-hidden="true"> Author: {{ product.user }}</i>
+                        <i class="fa fa-user" aria-hidden="true">{% trans 'Author:' %} {{ product.user }}</i>
                     </span>
                     <br>
                     <span class="label label-pill label-default">
-                        <i class="fa fa-calendar" aria-hidden="true"> Create: {{ product.created|date }}</i>
+                        <i class="fa fa-calendar"
+                           aria-hidden="true">{% trans 'Create:' %} {{ product.created|date }}</i>
                     </span>
                 </div>
                 <div class="clearfix"></div>
