@@ -1,7 +1,7 @@
 from django import forms
 from model_utils import Choices
 
-from src.apps.product.models import ProductModel
+from src.apps.product.models import ProductModel, CommentModel
 
 
 class FilterForm(forms.Form):
@@ -53,4 +53,22 @@ class ProductForm(forms.ModelForm):
                     'required': True,
                 },
             ),
+        }
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = CommentModel
+        fields = ('comment',)
+        widgets = {
+            'comment': forms.Textarea(
+                attrs={
+                    'id': 'comment-text',
+                    'class': 'form-control',
+                    'cols': 50,
+                    'row': 3,
+                    'placeholder': 'Body of comment',
+                    'required': True,
+                },
+            )
         }
