@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 import re
 
 from django.contrib import messages
@@ -16,8 +17,8 @@ from django.views.generic import ListView, DetailView
 from django.views.generic import UpdateView
 from pure_pagination import PaginationMixin
 
-from src.apps.product.forms import FilterForm, ProductForm
-from src.apps.product.models import ProductModel, LikeModel
+from src.apps.product.forms import FilterForm, ProductForm, CommentForm
+from src.apps.product.models import ProductModel, LikeModel, CommentModel
 
 
 class ProductsListView(PaginationMixin, ListView):
@@ -48,6 +49,15 @@ class ProductDetailView(DetailView):
     queryset = ProductModel.objects.select_related('user').annotate(like_total=Count('like'))
     template_name = 'product/product.html'
     context_object_name = 'product'
+
+    def get_context_data(self, **kwargs):
+        context = super(ProductDetailView, self).get_context_data(**kwargs)
+        context['comments'] = CommentModel.objects.select_related('user', 'product').filter(
+            product=self.object,
+            created__gte=datetime.datetime.now() - datetime.timedelta(days=1)
+        ).order_by('-created')
+        context['form'] = CommentForm()
+        return context
 
 
 class ProductCreateUpdateMixin(LoginRequiredMixin):
@@ -126,3 +136,82 @@ class LikeView(LoginRequiredMixin, View):
                 LikeModel.objects.create(user=request.user, product=product)
                 msg = 'Like added'
             return JsonResponse({'message': msg, 'like_count': product.like.count()}, status=200)
+
+
+class CommentView(CreateView):
+    model = CommentModel
+    form_class = CommentForm
+    context_object_name = 'comment'
+
+    comment_html = '''<div class="media" data-id={comment_id}>
+                            <a class="media-left" href="#">
+                                <img class="media-object" src="http://placehold.it/50x50" alt="User Photo">
+                            </a>
+                        <div class="media-body">
+                            <h4 class="media-heading">{author}</h4>
+                            <p>{comment}</p>
+                        </div>
+                        <div class="media-footer">
+                            <p>{created}</p>
+                        </div>
+                    </div>'''
+
+    def get(self, request, *args, **kwargs):
+        return redirect(reverse('products:detail', kwargs={'slug': kwargs['slug']}))
+
+    def post(self, request, *args, **kwargs):
+        if 'last' in self.request.path and 'id' in self.request.POST:
+            response_data = dict()
+            html = ''
+            response_data['disabled'] = False
+            if self.request.POST['id'] == '0':
+                comments = CommentModel.objects.prefetch_related('user', 'product').filter(
+                    product_id=self.kwargs['slug']).order_by('-created')[:5]
+                if comments.count() < 5:
+                    response_data['disabled'] = True
+            else:
+                date = CommentModel.objects.get(id=int(self.request.POST['id'])).created
+                comments = CommentModel.objects.prefetch_related('user', 'product').filter(
+                    product_id=self.kwargs['slug'], created__lt=date).order_by('-created')[:5]
+                if comments.count() < 5:
+                    response_data['disabled'] = True
+            for comment in comments:
+                author = 'Anonymous'
+                created = comment.created.strftime("%B %d, %Y, %-I:%M %p")
+                if comment.user is not None:
+                    author = comment.user.username
+                html += ''.join(self.comment_html.format(comment_id=comment.id,
+                                                         author=author,
+                                                         comment=comment.comment,
+                                                         created=created))
+            response_data['html'] = html
+            return JsonResponse(response_data, status=200)
+        return super(CommentView, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response_data = dict()
+        if self.request.is_ajax():
+            form = form.save(commit=False)
+            product = ProductModel.objects.get(slug=self.kwargs.get('slug'))
+            if self.request.user.is_anonymous():
+                form.user = None
+                author = 'Anonymous'
+            else:
+                form.user = self.request.user
+                author = form.user.username
+            form.product = product
+            form.save()
+            comment_id = CommentModel.objects.all().order_by('created').last().id
+            comment = form.comment
+            created = form.created.strftime('%B %d, %Y, %I:%M %p')
+            response_data['message'] = 'Your comment has successfully added'
+            response_data['html'] = self.comment_html.format(comment_id=comment_id,
+                                                             author=author,
+                                                             comment=comment,
+                                                             created=created)
+        return JsonResponse(response_data, status=200)
+
+    def form_invalid(self, form):
+        if self.request.is_ajax():
+            message = form.errors['comment'][0]
+            return JsonResponse({'message': message}, status=400)
