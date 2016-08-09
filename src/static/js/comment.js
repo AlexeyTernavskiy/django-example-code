@@ -125,14 +125,17 @@ $(document).ready(function () {
                 'id': lastCommentId
             },
             success: function (data) {
-                if (noComments.length > 0) {
-                    noComments.after(data.html);
-                    noComments.detach();
+                if (data.html) {
+                    if (noComments.length > 0) {
+                        noComments.after(data.html);
+                        noComments.detach();
+                    }
+                    else {
+                        $(comments[comments.length - 1]).after(data.html);
+                    }
+
                 }
-                else {
-                    $(comments[comments.length - 1]).after(data.html);
-                }
-                if (!data.html || data.disabled) {
+                if (data.disabled) {
                     $('#last-comments').prop('disabled', true);
                 }
             },
