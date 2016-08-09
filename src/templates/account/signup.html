@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% load i18n %}
 
 {% block title %}{% trans "Signup" %}{% endblock %}
@@ -42,4 +42,7 @@
         </form>
         <div class="clearfix"></div>
     </article>
+{% endblock %}
+{% block extra_scripts %}
+    <script src="{% static 'js/validate_password.js' %}"></script>
 {% endblock %}
