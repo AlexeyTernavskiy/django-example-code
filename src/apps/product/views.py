@@ -81,7 +81,6 @@ class ProductCreateUpdateMixin(LoginRequiredMixin):
         form.description = form.description.capitalize()
         form.slug = re.sub("^\s+|\n|\r|\s+$", '', form.name.lower()).replace(' ', '-')
         form.save()
-
         return redirect(self.get_success_url(slug=form.slug))
 
 
