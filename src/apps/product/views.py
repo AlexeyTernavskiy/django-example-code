@@ -60,7 +60,18 @@ class ProductDetailView(DetailView):
         return context
 
 
-class ProductCreateUpdateMixin(LoginRequiredMixin):
+class DispatchMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            if 'slug' in kwargs:
+                product = get_object_or_404(ProductModel, slug=kwargs.get('slug'))
+                if product.user != request.user:
+                    messages.add_message(request, messages.WARNING, 'You can not do this action')
+                    return redirect(reverse('products:detail', args=(kwargs.get('slug'),)))
+        return super(DispatchMixin, self).dispatch(request, *args, **kwargs)
+
+
+class ProductCreateUpdateMixin(DispatchMixin):
     form_class = ProductForm
     template_name = 'product/form.html'
 
@@ -102,7 +113,7 @@ class ProductUpdateView(ProductCreateUpdateMixin, UpdateView):
         return super(ProductUpdateView, self).get_success_url(**kwargs)
 
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
+class ProductDeleteView(DispatchMixin, DeleteView):
     model = ProductModel
     context_object_name = 'product'
     template_name = 'product/delete.html'
@@ -132,10 +143,12 @@ class LikeView(LoginRequiredMixin, View):
             try:
                 LikeModel.objects.get(user=request.user, product=product).delete()
                 msg = 'Like deleted'
+                status = 200
             except LikeModel.DoesNotExist:
                 LikeModel.objects.create(user=request.user, product=product)
                 msg = 'Like added'
-            return JsonResponse({'message': msg, 'like_count': product.like.count()}, status=200)
+                status = 201
+            return JsonResponse({'message': msg, 'like_count': product.like.count()}, status=status)
 
 
 class CommentView(CreateView):
@@ -155,6 +168,11 @@ class CommentView(CreateView):
                             <p>{created}</p>
                         </div>
                     </div>'''
+
+    def get_success_url(self, **kwargs):
+        return reverse('products:detail', kwargs={
+            'slug': kwargs.get('slug')
+        })
 
     def get(self, request, *args, **kwargs):
         return redirect(reverse('products:detail', kwargs={'slug': kwargs['slug']}))

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import json
 import random
 import re
 
@@ -193,13 +194,18 @@ class ProductViewsTestCase(TestCase):
         self.assertTrue(response.context['user'].is_authenticated)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'account/logout.html')
-        response = self.client.post(reverse('account_logout'))
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('index'))
+
+        response = self.client.post(reverse('account_logout'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'index.html')
+        m = next(iter(response.context['messages']))
+        self.assertEqual(m.message, 'You have signed out.')
+
         response = self.client.get(reverse('account_logout'), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'index.html')
         self.assertFalse(response.context['user'].is_authenticated)
+
         response = self.client.post(reverse('account_logout'), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'index.html')
@@ -448,3 +454,45 @@ class ProductViewsTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, '404.html')
+
+    def test_like_unauth(self):
+        self.client.logout()
+
+        product = self.products[0]
+        url = reverse('products:detail', args=(product.slug,))
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'product/product.html')
+        self.assertIsInstance(response.context['product'], ProductModel)
+        self.assertEqual(response.context['product'], product)
+        response = self.client.get(url + 'like/', follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'product/product.html')
+        response = self.client.post(url + 'like/', follow=True, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 403)
+        data = json.loads(response.content.decode('utf8'))
+        self.assertEqual(data['message'], 'To perform this action, you must be logged.')
+
+    def test_like_auth(self):
+        product = self.products[0]
+        url = reverse('products:detail', args=(product.slug,))
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'product/product.html')
+        self.assertEqual(response.context['product'], product)
+        response = self.client.get(url + 'like/', follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'product/product.html')
+        self.assertEqual(product.like.count(), 0)
+        response = self.client.post(url + 'like/', follow=True, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.content.decode('utf8'))
+        self.assertEqual(data['message'], 'Like added')
+        self.assertEqual(data['like_count'], 1)
+        self.assertEqual(product.like.count(), data['like_count'])
+        response = self.client.post(url + 'like/', follow=True, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content.decode('utf8'))
+        self.assertEqual(data['message'], 'Like deleted')
+        self.assertEqual(data['like_count'], 0)
+        self.assertEqual(product.like.count(), data['like_count'])
