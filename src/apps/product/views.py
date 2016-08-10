@@ -71,7 +71,8 @@ class ProductCreateUpdateMixin(LoginRequiredMixin):
 
     def post(self, request, *args, **kwargs):
         request.POST = request.POST.copy()
-        request.POST['name'] = request.POST['name'].capitalize()
+        if 'name' in request.POST:
+            request.POST['name'] = request.POST['name'].capitalize()
         return super(ProductCreateUpdateMixin, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):

@@ -6,7 +6,7 @@ import random
 import factory
 from django.contrib.auth import get_user_model
 
-from src.apps.product.models import ProductModel, CommentModel
+from src.apps.product.models import ProductModel, CommentModel, LikeModel
 
 User = get_user_model()
 USER_PASSWORD = 'qwerty'
@@ -33,7 +33,7 @@ class ProductFactory(factory.django.DjangoModelFactory):
         model = ProductModel
 
     user = factory.SubFactory(UserFactory)
-    name = factory.Sequence(lambda n: 'product_name_{}'.format(n))
+    name = factory.Sequence(lambda n: 'Product_name_{}'.format(n))
     slug = factory.Sequence(lambda n: 'product_slug_{}'.format(n))
     description = factory.Sequence(lambda n: 'product_description_{}'.format(n))
     price = factory.LazyAttribute(lambda n: random.randrange(0, 1000, 4))
@@ -50,7 +50,7 @@ class CommentFactory(factory.django.DjangoModelFactory):
 
 class LikeFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = CommentModel
+        model = LikeModel
 
     user = factory.SubFactory(UserFactory)
     product = factory.SubFactory(ProductFactory)
