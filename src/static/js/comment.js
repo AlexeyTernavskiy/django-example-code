@@ -136,7 +136,9 @@ $(document).ready(function () {
 
                 }
                 if (data.disabled) {
-                    $('#last-comments').prop('disabled', true);
+                    var lastCommentBtn = $('#last-comments');
+                    lastCommentBtn.prop('disabled', true);
+                    lastCommentBtn.text('No more comments')
                 }
             },
             error: function () {

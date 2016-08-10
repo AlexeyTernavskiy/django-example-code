@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import json
-import random
 import re
 
 from django.conf import settings
@@ -11,7 +10,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from src.apps.product.factories import UserFactory, ProductFactory, CommentFactory, LikeFactory, USER_PASSWORD
-from src.apps.product.models import ProductModel
+from src.apps.product.models import ProductModel, CommentModel
 
 
 class ProductViewsTestCase(TestCase):
@@ -25,7 +24,7 @@ class ProductViewsTestCase(TestCase):
         for product in self.products:
             self.comments += CommentFactory.create_batch(user=product.user,
                                                          product=product,
-                                                         size=random.randrange(0, 10))
+                                                         size=3)
         self.client.force_login(user=self.user1, backend=settings.AUTHENTICATION_BACKENDS[0])
 
     def tearDown(self):
@@ -281,6 +280,7 @@ class ProductViewsTestCase(TestCase):
         response = self.client.get(reverse('products:list') + '?filter=like')
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(response.context['products'], [self.products[10], self.products[11]])
+
         # Queryset filtering by -like
         response = self.client.get(reverse('products:list') + '?filter=-like')
         self.assertEqual(response.status_code, 200)
@@ -309,6 +309,7 @@ class ProductViewsTestCase(TestCase):
         response = self.client.get(reverse('products:add'))
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account_login') + '?next=/products/add/')
+
         response = self.client.get(reverse('products:add'), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'account/login.html')
@@ -319,6 +320,7 @@ class ProductViewsTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'index.html')
+
         response = self.client.get(reverse('products:add'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/form.html')
@@ -332,6 +334,7 @@ class ProductViewsTestCase(TestCase):
             'description': 'Description for New Product',
             'price': 123
         }
+
         response = self.client.get(reverse('products:add'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/form.html')
@@ -339,6 +342,7 @@ class ProductViewsTestCase(TestCase):
         self.assertEqual(ProductModel.objects.all().count(), 17)
         with self.assertRaises(ProductModel.DoesNotExist):
             ProductModel.objects.get(slug=product['slug'])
+
         response = self.client.post(reverse('products:add'), follow=True, data=product)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/product.html')
@@ -371,6 +375,7 @@ class ProductViewsTestCase(TestCase):
         self.assertEqual(ProductModel.objects.all().count(), 17)
         with self.assertRaises(ProductModel.DoesNotExist):
             ProductModel.objects.get(slug=data['name'])
+
         response = self.client.post(reverse('products:add'), follow=True, data=data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/product.html')
@@ -378,6 +383,7 @@ class ProductViewsTestCase(TestCase):
         self.assertEqual(ProductModel.objects.get(name=data['name']).user, response.context['user'])
         m = next(iter(response.context['messages']))
         self.assertEqual(m.message, 'Product {} successfully added'.format(data['name']))
+
         response = self.client.post(reverse('products:add'), follow=True, data=data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/form.html')
@@ -392,6 +398,7 @@ class ProductViewsTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account_login') + '?next=/products/product_slug_0/edit/')
+
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'account/login.html')
@@ -402,6 +409,7 @@ class ProductViewsTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'index.html')
+
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/form.html')
@@ -421,6 +429,7 @@ class ProductViewsTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('account_login') + '?next=/products/product_slug_0/delete/')
+
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'account/login.html')
@@ -431,6 +440,7 @@ class ProductViewsTestCase(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'index.html')
+
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/delete.html')
@@ -439,18 +449,21 @@ class ProductViewsTestCase(TestCase):
     def test_product_delete_auth(self):
         product = self.products[0]
         url = reverse('products:delete', args=(product.slug,))
+
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/delete.html')
         self.assertEqual(ProductModel.objects.all().count(), 17)
+
         response = self.client.post(url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/products.html')
-        m = next(iter(response.context['messages']))
-        self.assertEqual(m.message, 'Product {} successfully deleted'.format(product.name))
+        msg = next(iter(response.context['messages']))
+        self.assertEqual(msg.message, 'Product {} successfully deleted'.format(product.name))
         self.assertEqual(ProductModel.objects.all().count(), 16)
         with self.assertRaises(ProductModel.DoesNotExist):
             ProductModel.objects.get(slug=product.slug)
+
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, '404.html')
@@ -460,14 +473,17 @@ class ProductViewsTestCase(TestCase):
 
         product = self.products[0]
         url = reverse('products:detail', args=(product.slug,))
+
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/product.html')
         self.assertIsInstance(response.context['product'], ProductModel)
         self.assertEqual(response.context['product'], product)
+
         response = self.client.get(url + 'like/', follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/product.html')
+
         response = self.client.post(url + 'like/', follow=True, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 403)
         data = json.loads(response.content.decode('utf8'))
@@ -476,23 +492,61 @@ class ProductViewsTestCase(TestCase):
     def test_like_auth(self):
         product = self.products[0]
         url = reverse('products:detail', args=(product.slug,))
+
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/product.html')
         self.assertEqual(response.context['product'], product)
+
         response = self.client.get(url + 'like/', follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'product/product.html')
         self.assertEqual(product.like.count(), 0)
+
         response = self.client.post(url + 'like/', follow=True, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.content.decode('utf8'))
         self.assertEqual(data['message'], 'Like added')
         self.assertEqual(data['like_count'], 1)
         self.assertEqual(product.like.count(), data['like_count'])
+
         response = self.client.post(url + 'like/', follow=True, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode('utf8'))
         self.assertEqual(data['message'], 'Like deleted')
         self.assertEqual(data['like_count'], 0)
         self.assertEqual(product.like.count(), data['like_count'])
+
+    def test_comment(self):
+        product = self.products[0]
+        url = reverse('products:detail', args=(product.slug,))
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'product/product.html')
+        self.assertEqual(response.context['product'], product)
+
+        response = self.client.get(url + 'comment/', follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'product/product.html')
+        self.assertEqual(CommentModel.objects.filter(product=product).count(), 3)
+
+        response = self.client.post(url + 'comment/', follow=True, HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+                                    data=dict(comment='New Comment'))
+        self.assertEqual(response.status_code, 201)
+        data = json.loads(response.content.decode('utf8'))
+        self.assertEqual(data['message'], 'Your comment has successfully added')
+        self.assertEqual(CommentModel.objects.filter(product=product).count(), 4)
+
+        response = self.client.post(url + 'comment/', follow=True, data=dict(comment='New Comment'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'product/product.html')
+        self.assertEqual(CommentModel.objects.filter(product=product).count(), 5)
+        msg = next(iter(response.context['messages']))
+        self.assertEqual(msg.message, 'Comment successfully added')
+
+        response = self.client.post(url + 'comment/', follow=True)
+        self.assertEqual(response.status_code, 200)
+        msg = next(iter(response.context['messages']))
+        self.assertEqual(msg.message, 'The body of the comment should not be empty')
+        self.assertEqual(CommentModel.objects.filter(product=product).count(), 5)

@@ -1,8 +1,20 @@
 {% load i18n %}
 <section class="p-a-1">
     <h2 class="text-md-center">{% trans 'Comments' %}:</h2>
-    <form id="comment-form" class="row text-md-center">
+    {% if form.errors %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-warning" role="alert">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <form id="comment-form" method="post" action="{% url 'products:comment' product.slug %}" class="row text-md-center">
         {% csrf_token %}
+        {% for error in field.errors %}
+            <div class="alert alert-danger" role="alert">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
         {{ form }}
         <div class="clearfix"></div>
         <br>

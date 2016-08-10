@@ -135,7 +135,7 @@ class LikeView(LoginRequiredMixin, View):
         return super(LikeView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        return redirect(reverse('products:detail', kwargs={'slug': kwargs['slug']}))
+        return redirect(reverse('products:detail', kwargs={'slug': self.kwargs['slug']}))
 
     def post(self, request, **kwargs):
         if request.is_ajax():
@@ -155,6 +155,7 @@ class CommentView(CreateView):
     model = CommentModel
     form_class = CommentForm
     context_object_name = 'comment'
+    template_name = 'product/product.html'
 
     comment_html = '''<div class="media" data-id={comment_id}>
                             <a class="media-left" href="#">
@@ -169,13 +170,13 @@ class CommentView(CreateView):
                         </div>
                     </div>'''
 
-    def get_success_url(self, **kwargs):
-        return reverse('products:detail', kwargs={
-            'slug': kwargs.get('slug')
-        })
-
     def get(self, request, *args, **kwargs):
         return redirect(reverse('products:detail', kwargs={'slug': kwargs['slug']}))
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.INFO,
+                             'Comment successfully added')
+        return reverse('products:detail', kwargs={'slug': self.kwargs['slug']})
 
     def post(self, request, *args, **kwargs):
         if 'last' in self.request.path and 'id' in self.request.POST:
@@ -208,17 +209,18 @@ class CommentView(CreateView):
 
     def form_valid(self, form):
         response_data = dict()
+
+        form = form.save(commit=False)
+        product = ProductModel.objects.get(slug=self.kwargs.get('slug'))
+        if self.request.user.is_anonymous():
+            form.user = None
+            author = 'Anonymous'
+        else:
+            form.user = self.request.user
+            author = form.user.username
+        form.product = product
+        form.save()
         if self.request.is_ajax():
-            form = form.save(commit=False)
-            product = ProductModel.objects.get(slug=self.kwargs.get('slug'))
-            if self.request.user.is_anonymous():
-                form.user = None
-                author = 'Anonymous'
-            else:
-                form.user = self.request.user
-                author = form.user.username
-            form.product = product
-            form.save()
             comment_id = CommentModel.objects.all().order_by('created').last().id
             comment = form.comment
             created = form.created.strftime('%B %d, %Y, %I:%M %p')
@@ -227,9 +229,14 @@ class CommentView(CreateView):
                                                              author=author,
                                                              comment=comment,
                                                              created=created)
-        return JsonResponse(response_data, status=200)
+            return JsonResponse(response_data, status=201)
+        return super(CommentView, self).form_valid(form)
 
     def form_invalid(self, form):
         if self.request.is_ajax():
             message = form.errors['comment'][0]
             return JsonResponse({'message': message}, status=400)
+        else:
+            messages.add_message(self.request, messages.WARNING,
+                                 'The body of the comment should not be empty')
+            return redirect(reverse('products:detail', kwargs={'slug': self.kwargs['slug']}))
