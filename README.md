@@ -1,7 +1,7 @@
 # Django example code task
 ###Install###
 
-1. git clone **https://github.com/AlexeyTernavskiy/django-example-code.git**
+1. git clone **https://github.com/digitalashes/django-example-code.git**
 2. cd **django-example-code**
 3. pip install -r **requirements.txt**
 4. bower install
